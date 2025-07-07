@@ -1,0 +1,106 @@
+﻿@using Microsoft.AspNetCore.Html
+@model List<Product>
+
+@{
+	ViewData["Title"] = "Products";
+	int pageIndex = (int)ViewData["pageIndex"]!;
+	int totalPages = (int)ViewData["totalPages"]!;
+	string search = (string)ViewData["search"]!;
+	string currentColumn = (string)ViewData["column"]!;
+	string currentOrderBy = (string)ViewData["orderBy"]!;
+
+
+	HtmlString RenderArrow(string column) {
+		if (column != currentColumn)
+		{
+			return new HtmlString("");
+		}
+		if (currentOrderBy == "asc")
+		{
+			return new HtmlString("<i class='bi bi-arrow-up'></i>");
+		}
+
+		return new HtmlString("<i class='bi bi-arrow-down'></i>");
+		
+	}
+
+}
+<script>
+
+	function sortBy(column){
+	 let orderBy ="desc";
+	 let currentColumn="@currentColumn";
+	 let currentOrderBy="@currentOrderBy";
+     if(column==currentColumn){
+		 if(currentOrderBy=="desc"){
+			 orderBy="asc";
+		 }else{
+			 orderBy="desc";
+		 }
+	 }
+
+	 window.location.href="?search=@(search)&column="+column+"&orderBy="+orderBy;
+	}
+</script>
+<h2 class="text-center mb-5">List of Products</h2>
+
+<div class="row mb-5">
+	<div class="col ">
+		<a  class="btn btn-primary" asp-controller="Products"  asp-action="Create">New Product</a>
+	</div>
+	<div class="col">
+	<form class="d-flex">
+			<input class="form-control me-2" type="search" value="@search" name="search" placeholder="Search" aria-label="Search">
+			<button class="btn btn-outline-success" type="submit">Search</button>
+		</form>
+	</div>
+</div>
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th style="cursor:pointer;" onclick="sortBy('Id')"> ID @RenderArrow("Id") </th>
+			<th style="cursor:pointer;" onclick="sortBy('Name')">Name @RenderArrow("Name")</th>
+			<th style="cursor:pointer;" onclick="sortBy('Brand')">Brand @RenderArrow("Brand")</th>
+			<th style="cursor:pointer;" onclick="sortBy('Category')">Category @RenderArrow("Category")</th>
+			<th style="cursor:pointer;" onclick="sortBy('Price')">Price @RenderArrow("Price")</th>
+			<th>Image</th>	
+			<th style="cursor:pointer;" onclick="sortBy('CreatedAt')"> Created At @RenderArrow("CreatedAt")</th>
+			<th>Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach(var product in Model){
+
+			<tr>
+				<td>@product.Id</td>
+				<td>@product.Name</td>
+				<td>@product.Brand</td>
+				<td>@product.Category</td>
+				<td>@(product.Price)$</td>
+				<td><img src="/products/@product.ImageFileName" width="100"  /></td>
+				<td>@product.CreatedAt.ToString("dd/MM/yyyy")</td>
+				<td>
+					<a class="btn btn-primary" asp-controller="Products" asp-action="Edit" asp-route-id="@product.Id">Edit</a>
+					<a class="btn btn-danger" asp-controller="Products" asp-action="Delete" asp-route-id="@product.Id" onclick="return confirm('are you sure ?')"   >Delete</a>
+				</td>
+
+			</tr>
+		}
+	</tbody>
+
+</table>
+<nav >
+	<ul class="pagination">
+
+
+		@for(int i=1 ;i<=totalPages;i++){
+			string active = "";
+			if (i == pageIndex) active = "active";
+			<li class="page-item @active" aria-current="page">
+				<a class="page-link" asp-route-pageIndex="@i" asp-route-search="@search" asp-route-orderBy="@currentOrderBy" asp-route-column="@currentColumn" >@i</a>
+			</li>
+		}
+		
+		
+	</ul>
+</nav>
